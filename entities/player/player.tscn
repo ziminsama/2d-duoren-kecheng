@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://c0k0voeng6qno"]
+
+[ext_resource type="Script" uid="uid://bh3l2c3eo5qst" path="res://entities/player/player.gd" id="1_symyc"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_mx40f"]
+size = Vector2(18, 32)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mx40f"]
+
+[node name="Player" type="CharacterBody2D" unique_id=1212290310]
+script = ExtResource("1_symyc")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=610762632]
+position = Vector2(0, -16)
+texture = SubResource("PlaceholderTexture2D_mx40f")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=385429500]
+position = Vector2(0, -10)
+shape = SubResource("CircleShape2D_mx40f")
