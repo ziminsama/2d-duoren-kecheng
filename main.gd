@@ -1,12 +1,22 @@
 extends Node2D
 
+var player_scene: PackedScene = preload("uid://c0k0voeng6qno")
+
+@onready var multiplayer_spawner: MultiplayerSpawner = $MultiplayerSpawner
+
 
 func _ready() -> void:
-	print("hello world peer_ready.rpc")
+	#print("hello world peer_ready.rpc")
+	multiplayer_spawner.spawn_function = func(data):
+		var player = player_scene.instantiate()
+		player.name = str(data.peer_id)
+		return player
+	
 	peer_ready.rpc_id(1)
 
 
 @rpc("any_peer","call_local","reliable")
 func peer_ready():
-	print("peer %s ready" % multiplayer.get_remote_sender_id())
+	var sender_id = multiplayer.get_remote_sender_id()
+	multiplayer_spawner.spawn({"peer_id": sender_id})
 	

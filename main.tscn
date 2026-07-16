@@ -1,10 +1,9 @@
 [gd_scene format=3 uid="uid://dwmo7komf8w84"]
 
 [ext_resource type="Script" uid="uid://vrfmdtxtraye" path="res://main.gd" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://c0k0voeng6qno" path="res://entities/player/player.tscn" id="2_0xm2m"]
 
 [node name="Main" type="Node2D" unique_id=165933474]
 script = ExtResource("1_ig7tw")
 
-[node name="Player" parent="." unique_id=1212290310 instance=ExtResource("2_0xm2m")]
-position = Vector2(285, 237)
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1969955194]
+spawn_path = NodePath("..")
