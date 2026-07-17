@@ -11,7 +11,6 @@ var main_scene: PackedScene = preload("uid://dwmo7komf8w84")
 func _ready() -> void:
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_play_pressed)
-	#multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
 
 
