@@ -11,7 +11,7 @@ func _ready() -> void:
 	set_process(is_multiplayer_authority())
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	velocity = player_input_synchronizer_component.movement_vector * 300
 	move_and_slide()
 
