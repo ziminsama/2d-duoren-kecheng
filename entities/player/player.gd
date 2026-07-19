@@ -3,13 +3,21 @@ extends CharacterBody2D
 
 @onready var player_input_synchronizer_component: PlayerInputSynchronizerComponent = $PlayerInputSynchronizerComponent
 @onready var weapon_root: Node2D = $WeaponRoot
+@onready var fire_rate_timer: Timer = $FireRateTimer
 
 
+var bullet_scene: PackedScene = preload("uid://jlap4yf3gf0i")
 var input_multiplayer_authority: int
 
 
 func _ready() -> void:
 	player_input_synchronizer_component.set_multiplayer_authority(input_multiplayer_authority)
+
+
+#func _input(event: InputEvent) -> void:
+	#if event.is_action_pressed("attack"):
+		#create_bullet()
+#一开始测试用的,后面要同步到服务器,直接删掉无用
 
 
 func _process(_delta: float) -> void:
@@ -21,10 +29,31 @@ func _process(_delta: float) -> void:
 	if is_multiplayer_authority():
 		velocity = player_input_synchronizer_component.movement_vector * 300
 		move_and_slide()
-
-
 #测试 建议用_physics_process,我在测有什么不同,实际发现没啥不同
 #func _physics_process(delta: float) -> void:
 	#var movement_vector = Input.get_vector("move_left","move_right","move_up","move_down")
 	#velocity = movement_vector * 300
 	#move_and_slide()
+		if player_input_synchronizer_component.is_attack_pressed:
+			try_create_bullet()
+			#教学从一开始叫create_bullet无间隔，到后来加入timer有间隔，改成try_create_bullet，名字充分表达意图
+
+
+func try_create_bullet():
+	if !fire_rate_timer.is_stopped():
+		return
+	var bullet = bullet_scene.instantiate() as Bullet
+	#这个变量其实是场景实例化的节点,还在内存中,下一步再加到main场景中变成节点
+	bullet.global_position = weapon_root.global_position
+	#老师总结的经验是建议在添加节点之前改位置,这样会在_ready函数之前设好,如果添加了再改位置,就会运行了_ready之后再赋值全局位置
+	bullet.start(player_input_synchronizer_component.aim_vector)
+	#alt+↑是把代码上移，旋转和方向等自定义属性，可在节点加入场景树前先修改，有些是不行的。
+	get_parent().add_child(bullet, true)
+	fire_rate_timer.start()
+	
+	
+	
+	
+	
+	
+	
