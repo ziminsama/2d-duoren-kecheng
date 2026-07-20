@@ -21,6 +21,7 @@ script = ExtResource("1_2kyv7")
 replication_config = SubResource("SceneReplicationConfig_2kyv7")
 
 [node name="LifeTimer" type="Timer" parent="." unique_id=218704889]
+wait_time = 2.0
 one_shot = true
 autostart = true
 
