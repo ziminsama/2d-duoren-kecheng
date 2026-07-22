@@ -16,10 +16,14 @@ func _process(delta: float) -> void:
 	global_position += direction * SPEED * delta
 
 
-func  start(direction: Vector2):
+func start(direction: Vector2):
 	self.direction = direction
 	rotation = direction.angle()
 	#self.direction表示访问脚本自己定义的 direction 变量
+
+
+func register_collision():
+	queue_free()
 
 
 func _on_life_timer_timeout():

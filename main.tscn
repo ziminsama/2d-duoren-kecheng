@@ -1,10 +1,77 @@
 [gd_scene format=3 uid="uid://dwmo7komf8w84"]
 
 [ext_resource type="Script" uid="uid://vrfmdtxtraye" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://udw4lk8q63h7" path="res://assets/arena.png" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://m305qnj7q3hy" path="res://manager/enemy_manager.tscn" id="2_h2yge"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mx40f"]
+size = Vector2(32, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h2yge"]
+size = Vector2(500, 32)
 
 [node name="Main" type="Node2D" unique_id=165933474]
 script = ExtResource("1_ig7tw")
 
+[node name="EnemyManager" parent="." unique_id=958176721 node_paths=PackedStringArray("enemy_spawn_root", "spawn_rect") instance=ExtResource("2_h2yge")]
+enemy_spawn_root = NodePath("..")
+spawn_rect = NodePath("../SpawnRect")
+
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." unique_id=1969955194]
-_spawnable_scenes = PackedStringArray("uid://jlap4yf3gf0i")
+_spawnable_scenes = PackedStringArray("uid://jlap4yf3gf0i", "uid://ba8sru6tn6nvg")
 spawn_path = NodePath("..")
+
+[node name="PlayerSpawnPosition" type="Marker2D" parent="." unique_id=1328558988]
+position = Vector2(320, 185)
+metadata/_edit_lock_ = true
+
+[node name="Arena" type="Sprite2D" parent="." unique_id=1833857667]
+position = Vector2(320, 185)
+texture = ExtResource("2_0xm2m")
+metadata/_edit_lock_ = true
+
+[node name="SpawnRect" type="ReferenceRect" parent="." unique_id=487770872]
+custom_minimum_size = Vector2(414, 216)
+offset_left = 113.0
+offset_top = 73.0
+offset_right = 527.0
+offset_bottom = 289.0
+size_flags_horizontal = 0
+mouse_filter = 2
+border_width = 3.0
+metadata/_edit_lock_ = true
+
+[node name="StaticBodies" type="Node2D" parent="." unique_id=62182926]
+visible = false
+
+[node name="StaticBody2D" type="StaticBody2D" parent="StaticBodies" unique_id=522748069]
+position = Vector2(79, 182)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBodies/StaticBody2D" unique_id=152862489]
+shape = SubResource("RectangleShape2D_mx40f")
+metadata/_edit_lock_ = true
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="StaticBodies" unique_id=1856474838]
+position = Vector2(563, 188)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBodies/StaticBody2D2" unique_id=2085608677]
+shape = SubResource("RectangleShape2D_mx40f")
+metadata/_edit_lock_ = true
+
+[node name="StaticBody2D3" type="StaticBody2D" parent="StaticBodies" unique_id=515100951]
+position = Vector2(326, 39)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBodies/StaticBody2D3" unique_id=1819104503]
+shape = SubResource("RectangleShape2D_h2yge")
+metadata/_edit_lock_ = true
+
+[node name="StaticBody2D4" type="StaticBody2D" parent="StaticBodies" unique_id=1113879587]
+position = Vector2(322, 322)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBodies/StaticBody2D4" unique_id=2118825800]
+shape = SubResource("RectangleShape2D_h2yge")
+metadata/_edit_lock_ = true
