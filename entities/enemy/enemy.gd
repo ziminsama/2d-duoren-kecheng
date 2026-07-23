@@ -3,7 +3,7 @@ extends CharacterBody2D
 
 @onready var area_2d: Area2D = $Area2D
 @onready var target_acquisition_timer: Timer = $TargetAcquisitionTimer
-
+@onready var health_component: HealthComponent = $HealthComponent
 
 var current_health: int = 1
 var target_position: Vector2
@@ -14,6 +14,9 @@ func _ready() -> void:
 	target_acquisition_timer.timeout.connect(_on_target_acquisition_timer_timeout)
 	#每0.2秒拿一次
 	if is_multiplayer_authority():
+		#health_component.died.connect(_on_died)
+		#这段试了func _process里面效果一样但疯狂报错，感觉像每帧都在出信号，
+		#放_ready里面是因为触发一次？但是ready明明开始，还是不明白
 		acquire_target()
 
 #这里的怪物追敌AI可以延伸类比至法术追踪目标了,只是法术速度更快
@@ -24,9 +27,11 @@ func _process(delta: float) -> void:
 
 
 func handel_hit():
-	current_health -= 1
-	if current_health <= 0:
-		queue_free()
+	health_component.damage(1)
+	#用了组件原来的不用了
+	#current_health -= 1
+	#if current_health <= 0:
+		#queue_free()
 
 
 func acquire_target():
@@ -65,3 +70,7 @@ func _on_target_acquisition_timer_timeout():
 		acquire_target()
 #这里应该是作者的习惯,每个信号有一个形象的触发函数,函数里面才是真正的函数,可以方便加入服务器权威判断
 #另外一个ryan的教程是用navigation2d
+
+
+func _on_died():
+	queue_free()
