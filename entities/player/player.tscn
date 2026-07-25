@@ -2,8 +2,10 @@
 
 [ext_resource type="Script" uid="uid://bh3l2c3eo5qst" path="res://entities/player/player.gd" id="1_symyc"]
 [ext_resource type="PackedScene" uid="uid://cxo5tfet81kgh" path="res://component/player_input_synchronizer_component.tscn" id="2_abrql"]
+[ext_resource type="PackedScene" uid="uid://b5usb40v6ijfb" path="res://component/health_component.tscn" id="3_8fjmc"]
 [ext_resource type="Texture2D" uid="uid://ccju6ugpxkhe7" path="res://entities/player/player-medium.png" id="3_bls4j"]
 [ext_resource type="Texture2D" uid="uid://mw55j7sosc13" path="res://entities/player/rifle.png" id="4_fkugw"]
+[ext_resource type="PackedScene" uid="uid://e2m56b2wfkua" path="res://component/hurtbox_component.tscn" id="6_qiwj3"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_abrql"]
 properties/0/path = NodePath(".:global_position")
@@ -11,6 +13,9 @@ properties/0/spawn = true
 properties/0/replication_mode = 1
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mx40f"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_c3ba2"]
+radius = 5.0
 
 [node name="Player" type="CharacterBody2D" unique_id=1212290310 groups=["player"]]
 collision_layer = 0
@@ -22,6 +27,9 @@ aim_root = NodePath("../WeaponRoot")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1262268901]
 replication_config = SubResource("SceneReplicationConfig_abrql")
+
+[node name="HealthComponent" parent="." unique_id=1782218492 instance=ExtResource("3_8fjmc")]
+max_health = 5
 
 [node name="FireRateTimer" type="Timer" parent="." unique_id=807477466]
 wait_time = 0.25
@@ -45,3 +53,11 @@ offset = Vector2(-15, -6)
 visible = false
 position = Vector2(0, -10)
 shape = SubResource("CircleShape2D_mx40f")
+
+[node name="HurtboxComponent" parent="." unique_id=2120858935 node_paths=PackedStringArray("health_component") instance=ExtResource("6_qiwj3")]
+position = Vector2(0, -11)
+collision_mask = 4
+health_component = NodePath("../HealthComponent")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" unique_id=524228110]
+shape = SubResource("CircleShape2D_c3ba2")

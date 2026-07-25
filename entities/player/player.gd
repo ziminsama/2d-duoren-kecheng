@@ -4,7 +4,7 @@ extends CharacterBody2D
 @onready var player_input_synchronizer_component: PlayerInputSynchronizerComponent = $PlayerInputSynchronizerComponent
 @onready var weapon_root: Node2D = $WeaponRoot
 @onready var fire_rate_timer: Timer = $FireRateTimer
-
+@onready var health_component: HealthComponent = $HealthComponent
 
 var bullet_scene: PackedScene = preload("uid://jlap4yf3gf0i")
 var input_multiplayer_authority: int
@@ -12,6 +12,7 @@ var input_multiplayer_authority: int
 
 func _ready() -> void:
 	player_input_synchronizer_component.set_multiplayer_authority(input_multiplayer_authority)
+	health_component.died.connect(_on_died)
 
 
 #func _input(event: InputEvent) -> void:
@@ -50,10 +51,7 @@ func try_create_bullet():
 	#alt+↑是把代码上移，旋转和方向等自定义属性，可在节点加入场景树前先修改，有些是不行的。
 	get_parent().add_child(bullet, true)
 	fire_rate_timer.start()
-	
-	
-	
-	
-	
-	
-	
+
+
+func _on_died():
+	print("player died")

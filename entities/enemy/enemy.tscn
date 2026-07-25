@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cwp4bm8dr6352" path="res://entities/enemy/enemy_medium.png" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b5usb40v6ijfb" path="res://component/health_component.tscn" id="2_3fvr7"]
 [ext_resource type="PackedScene" uid="uid://e2m56b2wfkua" path="res://component/hurtbox_component.tscn" id="3_dt443"]
+[ext_resource type="PackedScene" uid="uid://ckc1phdlte8tq" path="res://component/hitbox_component.tscn" id="5_4wwj3"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_im2q6"]
 properties/0/path = NodePath(".:global_position")
@@ -15,6 +16,9 @@ size = Vector2(16, 24)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mx40f"]
 radius = 4.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l0443"]
+size = Vector2(10, 14)
 
 [node name="Enemy" type="CharacterBody2D" unique_id=633298797]
 collision_layer = 0
@@ -45,3 +49,10 @@ offset = Vector2(-8, -23)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1032434964]
 position = Vector2(0, -4)
 shape = SubResource("CircleShape2D_mx40f")
+
+[node name="HitboxComponent" parent="." unique_id=57623472 instance=ExtResource("5_4wwj3")]
+position = Vector2(0, -10)
+collision_layer = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent" unique_id=2035360869]
+shape = SubResource("RectangleShape2D_l0443")
