@@ -3,13 +3,14 @@
 [ext_resource type="Script" uid="uid://bpwoc7g3bbflx" path="res://entities/enemy/enemy.gd" id="1_im2q6"]
 [ext_resource type="Texture2D" uid="uid://cwp4bm8dr6352" path="res://entities/enemy/enemy_medium.png" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b5usb40v6ijfb" path="res://component/health_component.tscn" id="2_3fvr7"]
+[ext_resource type="PackedScene" uid="uid://e2m56b2wfkua" path="res://component/hurtbox_component.tscn" id="3_dt443"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_im2q6"]
 properties/0/path = NodePath(".:global_position")
 properties/0/spawn = true
 properties/0/replication_mode = 1
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_mx40f"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4wwj3"]
 size = Vector2(16, 24)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mx40f"]
@@ -29,13 +30,12 @@ autostart = true
 
 [node name="HealthComponent" parent="." unique_id=1782218492 instance=ExtResource("2_3fvr7")]
 
-[node name="Area2D" type="Area2D" parent="." unique_id=1978552178]
+[node name="HurtboxComponent" parent="." unique_id=2120858935 node_paths=PackedStringArray("health_component") instance=ExtResource("3_dt443")]
 position = Vector2(0, -12)
-collision_layer = 0
-collision_mask = 256
+health_component = NodePath("../HealthComponent")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=706213156]
-shape = SubResource("RectangleShape2D_mx40f")
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="HurtboxComponent" unique_id=1315199949]
+shape = SubResource("RectangleShape2D_4wwj3")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1925714005]
 texture = ExtResource("1_ksmh7")

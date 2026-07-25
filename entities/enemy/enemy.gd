@@ -1,20 +1,18 @@
 extends CharacterBody2D
 
 
-@onready var area_2d: Area2D = $Area2D
 @onready var target_acquisition_timer: Timer = $TargetAcquisitionTimer
 @onready var health_component: HealthComponent = $HealthComponent
 
-var current_health: int = 1
+
 var target_position: Vector2
 
 
 func _ready() -> void:
-	area_2d.area_entered.connect(_on_area_entered)
 	target_acquisition_timer.timeout.connect(_on_target_acquisition_timer_timeout)
 	#每0.2秒拿一次
 	if is_multiplayer_authority():
-		#health_component.died.connect(_on_died)
+		health_component.died.connect(_on_died)
 		#这段试了func _process里面效果一样但疯狂报错，感觉像每帧都在出信号，
 		#放_ready里面是因为触发一次？但是ready明明开始，还是不明白
 		acquire_target()
@@ -26,8 +24,8 @@ func _process(delta: float) -> void:
 		move_and_slide()
 
 
-func handel_hit():
-	health_component.damage(1)
+#func handel_hit():
+	#health_component.damage(1)
 	#用了组件原来的不用了
 	#current_health -= 1
 	#if current_health <= 0:
@@ -54,14 +52,14 @@ func acquire_target():
 		target_position = nearest_player.global_position
 
 
-func _on_area_entered(other_area: Area2D):
-	if !is_multiplayer_authority():
-		return
-	
-	if other_area.owner is Bullet:
-		var bullet = other_area.owner as Bullet
-		bullet.register_collision()
-		handel_hit()
+#func _on_area_entered(other_area: Area2D):
+	#if !is_multiplayer_authority():
+		#return
+	#
+	#if other_area.owner is Bullet:
+		#var bullet = other_area.owner as Bullet
+		#bullet.register_collision()
+		#handel_hit()
 		#print("collision")
 
 
@@ -73,4 +71,5 @@ func _on_target_acquisition_timer_timeout():
 
 
 func _on_died():
+	GameEvents.emit_enemy_died()
 	queue_free()
