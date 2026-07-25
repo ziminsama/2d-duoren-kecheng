@@ -18,7 +18,7 @@ func _ready() -> void:
 		acquire_target()
 
 #这里的怪物追敌AI可以延伸类比至法术追踪目标了,只是法术速度更快
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if is_multiplayer_authority():
 		velocity = global_position.direction_to(target_position) * 40
 		move_and_slide()
@@ -34,7 +34,7 @@ func _process(delta: float) -> void:
 
 func acquire_target():
 	var players = get_tree().get_nodes_in_group("player")
-	var nearest_player: Player
+	var nearest_player: Player = null
 	var nearest_squared_distance: float
 	
 	for player in players:

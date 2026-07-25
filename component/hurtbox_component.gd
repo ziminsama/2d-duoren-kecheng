@@ -1,6 +1,6 @@
 class_name HurtboxComponent
 extends Area2D
-
+#受击组件导入生命组件，有个碰撞体被区域进入触发的函数（只在服务器权威，进入的区域要是攻击组件才运行）
 @export var health_component: HealthComponent
 
 

@@ -46,8 +46,8 @@ func check_round_completed():
 
 
 func get_randon_spawn_position() -> Vector2:
-	var x = randi_range(0, spawn_rect.size.x)
-	var y = randi_range(0, spawn_rect.size.y)
+	var x = randf_range(0, spawn_rect.size.x)
+	var y = randf_range(0, spawn_rect.size.y)
 	return spawn_rect.global_position + Vector2(x, y)
 
 
