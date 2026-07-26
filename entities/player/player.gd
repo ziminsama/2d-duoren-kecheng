@@ -2,9 +2,10 @@ class_name Player
 extends CharacterBody2D
 
 @onready var player_input_synchronizer_component: PlayerInputSynchronizerComponent = $PlayerInputSynchronizerComponent
-@onready var weapon_root: Node2D = $WeaponRoot
+@onready var weapon_root: Node2D = $Visuals/WeaponRoot
 @onready var fire_rate_timer: Timer = $FireRateTimer
 @onready var health_component: HealthComponent = $HealthComponent
+@onready var visuals: Node2D = $Visuals
 
 var bullet_scene: PackedScene = preload("uid://jlap4yf3gf0i")
 var input_multiplayer_authority: int
@@ -22,15 +23,11 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	var aim_position = weapon_root.global_position \
-		+ player_input_synchronizer_component.aim_vector
-		#用\可以在下一行写，下一行加一个缩进影响，但能更好看
-	weapon_root.look_at(aim_position)
-	
+	update_aim_position()
 	if is_multiplayer_authority():
 		velocity = player_input_synchronizer_component.movement_vector * 300
 		move_and_slide()
-#测试 建议用_physics_process,我在测有什么不同,实际发现没啥不同
+#测试 其他教程建议用_physics_process,我在测有什么不同,实际发现没啥不同
 #func _physics_process(delta: float) -> void:
 	#var movement_vector = Input.get_vector("move_left","move_right","move_up","move_down")
 	#velocity = movement_vector * 300
@@ -38,6 +35,15 @@ func _process(_delta: float) -> void:
 		if player_input_synchronizer_component.is_attack_pressed:
 			try_create_bullet()
 			#教学从一开始叫create_bullet无间隔，到后来加入timer有间隔，改成try_create_bullet，名字充分表达意图
+
+
+func update_aim_position():
+	var aim_vector = player_input_synchronizer_component.aim_vector
+	var aim_position = weapon_root.global_position + aim_vector
+	
+	visuals.scale = Vector2.ONE if aim_vector.x >=0 else Vector2(-1, 1)
+	weapon_root.look_at(aim_position)
+	
 
 
 func try_create_bullet():
