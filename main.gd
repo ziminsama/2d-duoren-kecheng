@@ -30,4 +30,4 @@ func _ready() -> void:
 func peer_ready():
 	var sender_id = multiplayer.get_remote_sender_id()
 	multiplayer_spawner.spawn({"peer_id": sender_id})
-	enemy_manager.synchronize()
+	enemy_manager.synchronize(sender_id)

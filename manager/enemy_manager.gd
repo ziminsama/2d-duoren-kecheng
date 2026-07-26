@@ -16,7 +16,13 @@ const ENEMY_SPAWN_TIME_GROWTH: float = -0.15
 @onready var spawn_interval_timer: Timer = $SpawnIntervalTimer
 @onready var round_timer: Timer = $RoundTimer
 
-var round_count: int = 0
+var _round_count: int
+var round_count: int:
+	get:
+		return _round_count
+	set(value):
+		_round_count = value
+		round_changed.emit(_round_count)
 var spawned_enemies: int = 0
 
 
@@ -28,7 +34,7 @@ func _ready() -> void:
 		begin_round()
 
 
-func synchronize():
+func synchronize(to_peer_id:int = -1):
 	if !is_multiplayer_authority():
 		return
 	
@@ -38,7 +44,10 @@ func synchronize():
 		"round_count": round_count
 	}
 	
-	_synchronize.rpc(data)
+	if to_peer_id > -1 && to_peer_id != 1:
+		_synchronize.rpc_id(to_peer_id, data)
+	else:
+		_synchronize.rpc(data)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -47,7 +56,6 @@ func _synchronize(data: Dictionary):
 	if data["round_timer_is_running"]:
 		round_timer.start()
 	round_count = data["round_count"]
-	round_changed.emit(round_count)
 
 
 func get_round_time_remaining() -> float:
@@ -62,7 +70,6 @@ func begin_round():
 	spawn_interval_timer.wait_time = BASE_ENEMY_SPAWN_TIME + ((round_count - 1) * ENEMY_SPAWN_TIME_GROWTH)
 	spawn_interval_timer.start()
 	
-	round_changed.emit(round_count)
 	synchronize()
 
 
