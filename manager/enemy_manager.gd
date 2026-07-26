@@ -1,4 +1,7 @@
+class_name EnemyManager
 extends Node
+
+signal round_changed(round_number: int)
 
 const BASE_ROUND_TIME: int = 10
 const ROUND_GROWTH: int = 5
@@ -21,7 +24,34 @@ func _ready() -> void:
 	spawn_interval_timer.timeout.connect(_on_spawn_interval_timer_timeout)
 	round_timer.timeout.connect(_on_round_timer_timeout)
 	GameEvents.enemy_died.connect(_on_enemy_died)
-	begin_round()
+	if is_multiplayer_authority():
+		begin_round()
+
+
+func synchronize():
+	if !is_multiplayer_authority():
+		return
+	
+	var data = {
+		"round_timer_is_running": !round_timer.is_stopped(),
+		"round_timer_time_left": round_timer.time_left,
+		"round_count": round_count
+	}
+	
+	_synchronize.rpc(data)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _synchronize(data: Dictionary):
+	round_timer.wait_time = data["round_timer_time_left"]
+	if data["round_timer_is_running"]:
+		round_timer.start()
+	round_count = data["round_count"]
+	round_changed.emit(round_count)
+
+
+func get_round_time_remaining() -> float:
+	return round_timer.time_left
 
 
 func begin_round():
@@ -32,7 +62,8 @@ func begin_round():
 	spawn_interval_timer.wait_time = BASE_ENEMY_SPAWN_TIME + ((round_count - 1) * ENEMY_SPAWN_TIME_GROWTH)
 	spawn_interval_timer.start()
 	
-	print("begining round %s" % round_count)
+	round_changed.emit(round_count)
+	synchronize()
 
 
 func check_round_completed():
