@@ -3,33 +3,51 @@ extends CharacterBody2D
 
 @onready var target_acquisition_timer: Timer = $TargetAcquisitionTimer
 @onready var health_component: HealthComponent = $HealthComponent
-
+@onready var visuals: Node2D = $Visuals
 
 var target_position: Vector2
+var is_spawning: bool
 
 
 func _ready() -> void:
 	target_acquisition_timer.timeout.connect(_on_target_acquisition_timer_timeout)
-	#每0.2秒拿一次
+	play_spawn_animation()
+	
 	if is_multiplayer_authority():
 		health_component.died.connect(_on_died)
 		#这段试了func _process里面效果一样但疯狂报错，感觉像每帧都在出信号，
-		#放_ready里面是因为触发一次？但是ready明明开始，还是不明白
+		#放_ready里面是因为触发一次？但是ready明明开始，还是不明白.新理解,是新生成的enemy的health_com要连上enemy的_on_died信号?
 		acquire_target()
 
 #这里的怪物追敌AI可以延伸类比至法术追踪目标了,只是法术速度更快
 func _process(_delta: float) -> void:
-	if is_multiplayer_authority():
+	if is_multiplayer_authority() && !is_spawning:
 		velocity = global_position.direction_to(target_position) * 40
 		move_and_slide()
+	
+	if !is_spawning:
+		flip()
 
 
-#func handel_hit():
-	#health_component.damage(1)
-	#用了组件原来的不用了
-	#current_health -= 1
-	#if current_health <= 0:
-		#queue_free()
+func flip():
+	visuals.scale = Vector2.ONE if global_position.x < target_position.x else Vector2(-1, 1)
+
+
+func play_spawn_animation():
+	is_spawning = true
+	var tween := create_tween()
+	#easings.net里面可以看补间曲线
+	tween.tween_property(visuals, "scale", Vector2.ONE, 0.4)\
+		.from(Vector2.ZERO)\
+		.set_ease(Tween.EASE_OUT)\
+		.set_trans(Tween.TRANS_BACK)
+	#这里connect用了新方法,匿名函数.之前是放一个回调函数，另外再定义这个回调函数
+	tween.finished.connect(func ():
+		is_spawning = false
+	)
+	#另一种方法,异步操作
+	#await tween.finished
+	#is_spawning = false
 
 
 func acquire_target():
@@ -50,17 +68,6 @@ func acquire_target():
 	
 	if nearest_player != null:
 		target_position = nearest_player.global_position
-
-
-#func _on_area_entered(other_area: Area2D):
-	#if !is_multiplayer_authority():
-		#return
-	#
-	#if other_area.owner is Bullet:
-		#var bullet = other_area.owner as Bullet
-		#bullet.register_collision()
-		#handel_hit()
-		#print("collision")
 
 
 func _on_target_acquisition_timer_timeout():
