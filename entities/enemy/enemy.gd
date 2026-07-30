@@ -4,37 +4,39 @@ extends CharacterBody2D
 @onready var target_acquisition_timer: Timer = $TargetAcquisitionTimer
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var visuals: Node2D = $Visuals
+@onready var attack_cooldown_timer: Timer = $AttackCooldownTimer
+@onready var charge_attack_timer: Timer = $ChargeAttackTimer
+@onready var hitbox_collision_shape: CollisionShape2D = %HitboxCollisionShape
 
 var target_position: Vector2
-var is_spawning: bool
+var state_machine: CallableStateMachine = CallableStateMachine.new()
+var default_collision_mask: int
+var default_collision_layer: int
 
 
 func _ready() -> void:
-	target_acquisition_timer.timeout.connect(_on_target_acquisition_timer_timeout)
-	play_spawn_animation()
+	state_machine.add_states(state_spawn, enter_state_spawn, Callable())
+	state_machine.add_states(state_normal, enter_state_normal, Callable())
+	state_machine.add_states(state_charge_attack, enter_state_charge_attack, Callable())
+	state_machine.add_states(state_attack, enter_state_attack, leave_state_attack)
+	state_machine.set_initial_state(state_spawn)
+	
+	default_collision_layer = collision_layer
+	default_collision_mask = collision_mask
+	hitbox_collision_shape.disabled = true
 	
 	if is_multiplayer_authority():
 		health_component.died.connect(_on_died)
-		#这段试了func _process里面效果一样但疯狂报错，感觉像每帧都在出信号，
-		#放_ready里面是因为触发一次？但是ready明明开始，还是不明白.新理解,是新生成的enemy的health_com要连上enemy的_on_died信号?
-		acquire_target()
+
 
 #这里的怪物追敌AI可以延伸类比至法术追踪目标了,只是法术速度更快
 func _process(_delta: float) -> void:
-	if is_multiplayer_authority() && !is_spawning:
-		velocity = global_position.direction_to(target_position) * 40
+	state_machine.update()
+	if is_multiplayer_authority():
 		move_and_slide()
-	
-	if !is_spawning:
-		flip()
 
 
-func flip():
-	visuals.scale = Vector2.ONE if global_position.x < target_position.x else Vector2(-1, 1)
-
-
-func play_spawn_animation():
-	is_spawning = true
+func enter_state_spawn():
 	var tween := create_tween()
 	#easings.net里面可以看补间曲线
 	tween.tween_property(visuals, "scale", Vector2.ONE, 0.4)\
@@ -43,11 +45,72 @@ func play_spawn_animation():
 		.set_trans(Tween.TRANS_BACK)
 	#这里connect用了新方法,匿名函数.之前是放一个回调函数，另外再定义这个回调函数
 	tween.finished.connect(func ():
-		is_spawning = false
+		state_machine.change_state(state_normal)
 	)
-	#另一种方法,异步操作
-	#await tween.finished
-	#is_spawning = false
+
+
+func state_spawn():
+	pass
+
+
+func enter_state_normal():
+	if is_multiplayer_authority():
+		acquire_target()
+		target_acquisition_timer.start()
+
+
+func state_normal():
+	if is_multiplayer_authority():
+		velocity = global_position.direction_to(target_position) * 40
+		
+		if target_acquisition_timer.is_stopped():
+			acquire_target()
+			target_acquisition_timer.start()
+		
+		if attack_cooldown_timer.is_stopped() && global_position.distance_to(target_position) < 150:
+			state_machine.change_state(state_charge_attack)
+	
+	flip()
+
+
+func enter_state_charge_attack():
+	acquire_target()
+	charge_attack_timer.start()
+
+
+func state_charge_attack():
+	if is_multiplayer_authority():
+		#这里直接用,不好解释
+		velocity = velocity.lerp(Vector2.ZERO, 1.0 - exp(-15 * get_process_delta_time()))
+		if charge_attack_timer.is_stopped():
+			state_machine.change_state(state_attack)
+
+
+func enter_state_attack():
+	if is_multiplayer_authority():
+		collision_mask = 1 << 0
+		collision_layer = 0
+		hitbox_collision_shape.disabled = false
+		velocity = global_position.direction_to(target_position) * 400
+
+
+func state_attack():
+	if is_multiplayer_authority():
+		velocity = velocity.lerp(Vector2.ZERO, 1.0 - exp(-3 * get_process_delta_time()))
+		if velocity.length() < 25:
+			state_machine.change_state(state_normal)
+
+
+func leave_state_attack():
+	if is_multiplayer_authority():
+		collision_mask = default_collision_mask
+		collision_layer = default_collision_layer
+		hitbox_collision_shape.disabled = true
+		attack_cooldown_timer.start()
+
+
+func flip():
+	visuals.scale = Vector2.ONE if global_position.x < target_position.x else Vector2(-1, 1)
 
 
 func acquire_target():
@@ -68,13 +131,6 @@ func acquire_target():
 	
 	if nearest_player != null:
 		target_position = nearest_player.global_position
-
-
-func _on_target_acquisition_timer_timeout():
-	if is_multiplayer_authority():
-		acquire_target()
-#这里应该是作者的习惯,每个信号有一个形象的触发函数,函数里面才是真正的函数,可以方便加入服务器权威判断
-#另外一个ryan的教程是用navigation2d
 
 
 func _on_died():
