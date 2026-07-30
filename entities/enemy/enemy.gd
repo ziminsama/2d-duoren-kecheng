@@ -7,26 +7,46 @@ extends CharacterBody2D
 @onready var attack_cooldown_timer: Timer = $AttackCooldownTimer
 @onready var charge_attack_timer: Timer = $ChargeAttackTimer
 @onready var hitbox_collision_shape: CollisionShape2D = %HitboxCollisionShape
+@onready var alert_sprite: Sprite2D = $AlertSprite
 
 var target_position: Vector2
 var state_machine: CallableStateMachine = CallableStateMachine.new()
 var default_collision_mask: int
 var default_collision_layer: int
+#解决两个状态的补间动画同时触发
+var alert_tween: Tween
+
+var current_state: String:
+	#这里的get触发是因为current_state在MultiplayerSynchronizer同步路径了,会每帧（或同步间隔 tick）读取你配置的同步属性
+	get:
+		#print("get到东西了")
+		return state_machine.current_state
+	#所以这里的set又是怎么触发的?
+	set(value):
+		print("=== 外层current_state的set被触发 ===")
+		state_machine.change_state(Callable.create(self, value))
+		#var state: Callable = Callable.create(self, value)
+		#state_machine.change_state(state)
+		#上面两行合并成一行
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_SCENE_INSTANTIATED:
+		state_machine.add_states(state_spawn, enter_state_spawn, Callable())
+		state_machine.add_states(state_normal, enter_state_normal, Callable())
+		state_machine.add_states(state_charge_attack, enter_state_charge_attack, leave_state_charge_attack)
+		state_machine.add_states(state_attack, enter_state_attack, leave_state_attack)
 
 
 func _ready() -> void:
-	state_machine.add_states(state_spawn, enter_state_spawn, Callable())
-	state_machine.add_states(state_normal, enter_state_normal, Callable())
-	state_machine.add_states(state_charge_attack, enter_state_charge_attack, Callable())
-	state_machine.add_states(state_attack, enter_state_attack, leave_state_attack)
-	state_machine.set_initial_state(state_spawn)
-	
 	default_collision_layer = collision_layer
 	default_collision_mask = collision_mask
 	hitbox_collision_shape.disabled = true
+	alert_sprite.scale = Vector2.ZERO
 	
 	if is_multiplayer_authority():
 		health_component.died.connect(_on_died)
+		state_machine.set_initial_state(state_spawn)
 
 
 #这里的怪物追敌AI可以延伸类比至法术追踪目标了,只是法术速度更快
@@ -74,8 +94,17 @@ func state_normal():
 
 
 func enter_state_charge_attack():
-	acquire_target()
-	charge_attack_timer.start()
+	if is_multiplayer_authority():
+		acquire_target()
+		charge_attack_timer.start()
+	#判断补间是否有效,is_valid()就是判断补间动画是否在运行,在就kill掉
+	if alert_tween != null && alert_tween.is_valid():
+		alert_tween.kill()
+	
+	alert_tween = create_tween()
+	alert_tween.tween_property(alert_sprite, "scale",Vector2.ONE, .2 )\
+		.set_ease(Tween.EASE_OUT)\
+		.set_trans(Tween.TransitionType.TRANS_BACK)
 
 
 func state_charge_attack():
@@ -84,6 +113,17 @@ func state_charge_attack():
 		velocity = velocity.lerp(Vector2.ZERO, 1.0 - exp(-15 * get_process_delta_time()))
 		if charge_attack_timer.is_stopped():
 			state_machine.change_state(state_attack)
+	flip()
+
+
+func leave_state_charge_attack():
+	if alert_tween != null && alert_tween.is_valid():
+		alert_tween.kill()
+	
+	alert_tween = create_tween()
+	alert_tween.tween_property(alert_sprite, "scale",Vector2.ZERO, .2 )\
+		.set_ease(Tween.EASE_IN)\
+		.set_trans(Tween.TransitionType.TRANS_BACK)
 
 
 func enter_state_attack():

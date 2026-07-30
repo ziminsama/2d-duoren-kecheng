@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cwp4bm8dr6352" path="res://entities/enemy/enemy_medium.png" id="1_ksmh7"]
 [ext_resource type="PackedScene" uid="uid://b5usb40v6ijfb" path="res://component/health_component.tscn" id="2_3fvr7"]
 [ext_resource type="PackedScene" uid="uid://e2m56b2wfkua" path="res://component/hurtbox_component.tscn" id="3_dt443"]
+[ext_resource type="Texture2D" uid="uid://b4qnki6cbv8k8" path="res://entities/enemy/attack_alert.png" id="4_d50e0"]
 [ext_resource type="PackedScene" uid="uid://ckc1phdlte8tq" path="res://component/hitbox_component.tscn" id="5_4wwj3"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_im2q6"]
@@ -13,6 +14,9 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath(".:target_position")
 properties/1/spawn = true
 properties/1/replication_mode = 2
+properties/2/path = NodePath(".:current_state")
+properties/2/spawn = true
+properties/2/replication_mode = 2
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4wwj3"]
 size = Vector2(16, 24)
@@ -52,6 +56,10 @@ health_component = NodePath("../HealthComponent")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="HurtboxComponent" unique_id=1315199949]
 shape = SubResource("RectangleShape2D_4wwj3")
+
+[node name="AlertSprite" type="Sprite2D" parent="." unique_id=1233065565]
+position = Vector2(0, -30)
+texture = ExtResource("4_d50e0")
 
 [node name="Visuals" type="Node2D" parent="." unique_id=835735141]
 
