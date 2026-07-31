@@ -14,6 +14,7 @@ signal died
 var bullet_scene: PackedScene = preload("uid://jlap4yf3gf0i")
 var muzzle_flash_scene: PackedScene = preload("uid://cnxo8p5hrj6tv")
 var input_multiplayer_authority: int
+var is_dying: bool
 
 
 func _ready() -> void:
@@ -30,16 +31,14 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	update_aim_position()
 	if is_multiplayer_authority():
+		if is_dying:
+			global_position = Vector2.RIGHT * 1000
+			return
+
 		velocity = player_input_synchronizer_component.movement_vector * 300
 		move_and_slide()
-#测试 其他教程建议用_physics_process,我在测有什么不同,实际发现没啥不同
-#func _physics_process(delta: float) -> void:
-	#var movement_vector = Input.get_vector("move_left","move_right","move_up","move_down")
-	#velocity = movement_vector * 300
-	#move_and_slide()
 		if player_input_synchronizer_component.is_attack_pressed:
 			try_fire()
-			#教学从一开始叫create_bullet无间隔，到后来加入timer有间隔，改成try_create_bullet，名字充分表达意图
 
 
 func update_aim_position():
@@ -78,8 +77,16 @@ func play_fire_effect():
 	get_parent().add_child(muzzle_flash)
 
 
+@rpc("authority", "call_local", "reliable")
+func kill():
+	is_dying = true
+	player_input_synchronizer_component.public_visibility = false
+
+
 func _on_died():
-	#print("player died")
+	kill.rpc()
+	await get_tree().create_timer(.5).timeout
+	
 	died.emit()
 	queue_free()
 	

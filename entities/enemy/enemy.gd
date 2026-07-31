@@ -23,7 +23,7 @@ var current_state: String:
 		return state_machine.current_state
 	#所以这里的set又是怎么触发的?
 	set(value):
-		print("=== 外层current_state的set被触发 ===")
+		#print("=== 外层current_state的set被触发 ===")
 		state_machine.change_state(Callable.create(self, value))
 		#var state: Callable = Callable.create(self, value)
 		#state_machine.change_state(state)
