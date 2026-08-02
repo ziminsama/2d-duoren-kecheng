@@ -8,6 +8,10 @@ extends CharacterBody2D
 @onready var charge_attack_timer: Timer = $ChargeAttackTimer
 @onready var hitbox_collision_shape: CollisionShape2D = %HitboxCollisionShape
 @onready var alert_sprite: Sprite2D = $AlertSprite
+@onready var hurtbox_component: HurtboxComponent = $HurtboxComponent
+
+var impact_particles_scene: PackedScene = preload("uid://cq1qm2s7qhrmo")
+var ground_particles_scene: PackedScene = preload("uid://by4v06jb7ah4e")
 
 var target_position: Vector2
 var state_machine: CallableStateMachine = CallableStateMachine.new()
@@ -47,6 +51,7 @@ func _ready() -> void:
 	if is_multiplayer_authority():
 		health_component.died.connect(_on_died)
 		state_machine.set_initial_state(state_spawn)
+		hurtbox_component.hit_by_hitbox.connect(_on_hit_by_hitbox)
 
 
 #这里的怪物追敌AI可以延伸类比至法术追踪目标了,只是法术速度更快
@@ -173,6 +178,31 @@ func acquire_target():
 		target_position = nearest_player.global_position
 
 
+@rpc("authority", "call_local", "unreliable")
+func spawn_hit_particles():
+	var hit_particles: Node2D = impact_particles_scene.instantiate()
+	hit_particles.global_position = hurtbox_component.global_position
+	get_parent().add_child(hit_particles)
+
+
+@rpc("authority", "call_local", "unreliable")
+func spawn_death_particles():
+	var death_particles: Node2D = ground_particles_scene.instantiate()
+	
+	var background_node: Node = Main.background_mask
+	if !is_instance_valid(background_node):
+		#保险措施,防止节点不存在
+		background_node = get_parent()
+	
+	background_node.add_child(death_particles)
+	death_particles.global_position = global_position
+
+
 func _on_died():
+	spawn_death_particles.rpc()
 	GameEvents.emit_enemy_died()
 	queue_free()
+
+
+func _on_hit_by_hitbox():
+	spawn_hit_particles.rpc()

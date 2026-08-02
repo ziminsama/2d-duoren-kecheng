@@ -1,19 +1,26 @@
+class_name Main
 extends Node2D
 
 const MAIN_MENU_SCENE_PATH := "res://ui/main_menu/main_menu.tscn"
+
+static var background_effects: Node2D
+static var background_mask: Sprite2D
 
 var player_scene: PackedScene = preload("uid://c0k0voeng6qno")
 
 @onready var multiplayer_spawner: MultiplayerSpawner = $MultiplayerSpawner
 @onready var player_spawn_position: Marker2D = $PlayerSpawnPosition
 @onready var enemy_manager: EnemyManager = $EnemyManager
-
+@onready var _backgournd_effects: Node2D = $BackgourndEffects
+@onready var _background_mask: Sprite2D = %BackgroundMask
 
 var dead_peers: Array[int] = []
 var player_dictionary: Dictionary[int, Player] = {}
 
 
 func _ready() -> void:
+	background_effects = _backgournd_effects
+	background_mask = _background_mask
 	#print("hello world peer_ready.rpc")
 	multiplayer_spawner.spawn_function = func(data):
 		var player = player_scene.instantiate() as Player
