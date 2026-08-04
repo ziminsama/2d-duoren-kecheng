@@ -1,33 +1,26 @@
 extends Control
 
-const PORT: int = 3000
-
 var main_scene: PackedScene = preload("uid://dwmo7komf8w84")
 
-@onready var host_button: Button = $HBoxContainer/HostButton
-@onready var join_button: Button = $HBoxContainer/JoinButton
+@onready var single_player_button: Button = $VBoxContainer/SinglePlayerButton
+@onready var multiplayer_button: Button = $VBoxContainer/MultiplayerButton
+@onready var quit_button: Button = $VBoxContainer/QuitButton
 
+@onready var multiplayer_menu_scene: PackedScene = load("uid://blcl2gvj853fj")
 
 func _ready() -> void:
-	host_button.pressed.connect(_on_host_pressed)
-	join_button.pressed.connect(_on_play_pressed)
-	multiplayer.connected_to_server.connect(_on_connected_to_server)
+	single_player_button.pressed.connect(_on_single_player_button_pressed)
+	multiplayer_button.pressed.connect(_on_multiplayer_button_pressed)
+	quit_button.pressed.connect(_on_quit_button_pressed)
 
 
-func _on_host_pressed() -> void:
-	var server_peer := ENetMultiplayerPeer.new()
-	server_peer.create_server(PORT)
-	multiplayer.multiplayer_peer = server_peer
+func _on_single_player_button_pressed():
 	get_tree().change_scene_to_packed(main_scene)
 
 
-func _on_play_pressed() -> void:
-	var client_peer := ENetMultiplayerPeer.new()
-	client_peer.create_client("127.0.0.1",PORT)
-	multiplayer.multiplayer_peer = client_peer
+func _on_multiplayer_button_pressed():
+	get_tree().change_scene_to_packed(multiplayer_menu_scene)
 
 
-func _on_connected_to_server():
-	get_tree().change_scene_to_packed(main_scene)
-	
-	
+func _on_quit_button_pressed():
+	get_tree().quit()
