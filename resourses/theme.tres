@@ -2,6 +2,7 @@
 
 [ext_resource type="FontFile" uid="uid://cteyvk2gfkff1" path="res://resourses/font/KarenFat.ttf" id="1_51p2u"]
 [ext_resource type="Texture2D" uid="uid://dmr7hg16kkrij" path="res://assets/ui/buttons.png" id="1_huhop"]
+[ext_resource type="Texture2D" uid="uid://ckawhob8whcvp" path="res://assets/ui/panel.png" id="2_45wu2"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_87xyq"]
 texture = ExtResource("1_huhop")
@@ -37,6 +38,14 @@ texture_margin_right = 4.0
 texture_margin_bottom = 5.0
 region_rect = Rect2(32, 2, 16, 16)
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mx40f"]
+texture = ExtResource("2_45wu2")
+texture_margin_left = 4.0
+texture_margin_top = 5.0
+texture_margin_right = 4.0
+texture_margin_bottom = 5.0
+region_rect = Rect2(0, 0, 32, 32)
+
 [resource]
 default_font = ExtResource("1_51p2u")
 default_font_size = 16
@@ -49,3 +58,4 @@ Button/styles/focus = SubResource("StyleBoxEmpty_huhop")
 Button/styles/hover = SubResource("StyleBoxTexture_huhop")
 Button/styles/normal = SubResource("StyleBoxTexture_37jea")
 Button/styles/pressed = SubResource("StyleBoxTexture_45wu2")
+PanelContainer/styles/panel = SubResource("StyleBoxTexture_mx40f")
