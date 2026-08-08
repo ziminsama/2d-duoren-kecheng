@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://dodyhas6d6dr0"]
+
+[ext_resource type="Script" uid="uid://drqcwv2vrcst5" path="res://manager/lobby_manager.gd" id="1_lvhkk"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_lvhkk"]
+properties/0/path = NodePath(".:is_lobby_closed")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+
+[node name="LobbyManager" type="Node" unique_id=423309602]
+script = ExtResource("1_lvhkk")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." unique_id=1479123113]
+replication_config = SubResource("SceneReplicationConfig_lvhkk")

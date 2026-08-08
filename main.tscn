@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://vrfmdtxtraye" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://udw4lk8q63h7" path="res://assets/arena.png" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://dodyhas6d6dr0" path="res://manager/lobby_manager.tscn" id="2_5vw27"]
 [ext_resource type="PackedScene" uid="uid://m305qnj7q3hy" path="res://manager/enemy_manager.tscn" id="2_h2yge"]
 [ext_resource type="PackedScene" uid="uid://djmakegx32aga" path="res://ui/game_ui/game_ui.tscn" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://jtjwukivc01m" path="res://ui/pause_menu/pause_menu.tscn" id="3_272bh"]
@@ -16,6 +17,8 @@ size = Vector2(500, 32)
 
 [node name="Main" type="Node2D" unique_id=165933474]
 script = ExtResource("1_ig7tw")
+
+[node name="LobbyManager" parent="." unique_id=423309602 instance=ExtResource("2_5vw27")]
 
 [node name="EnemyManager" parent="." unique_id=958176721 node_paths=PackedStringArray("enemy_spawn_root", "spawn_rect") instance=ExtResource("2_h2yge")]
 enemy_spawn_root = NodePath("../YSortRoot")
