@@ -2,9 +2,18 @@ class_name LobbyManager
 extends Node
 
 signal all_peers_ready
+signal self_peer_ready
+signal lobby_closed
 
 var ready_peer_id: Array[int] = []
-var is_lobby_closed: bool
+var _is_lobby_closed: bool
+var is_lobby_closed: bool:
+	get:
+		return _is_lobby_closed
+	set(value):
+		_is_lobby_closed = value
+		if _is_lobby_closed:
+			lobby_closed.emit()
 
 #本来不用这个,但需要解决一种情况,例如3个人2个人按了R,第3个没按R,然后又掉线了,check_all_peer_ready()就会返回false就开始不了了
 func _ready() -> void:
@@ -26,14 +35,22 @@ func close_lobby():
 	is_lobby_closed = true
 
 
+@rpc("authority", "call_local", "reliable")
+func set_peer_ready(peer_id: int):
+	if peer_id == multiplayer.get_unique_id():
+		self_peer_ready.emit()
+	
+	if !ready_peer_id.has(peer_id):
+		ready_peer_id.append(peer_id)
+
+
 @rpc("any_peer", "call_local", "reliable")
 func request_peer_ready():
 	if !is_multiplayer_authority() or is_lobby_closed:
 		return
 	
 	var sender_id := multiplayer.get_remote_sender_id()
-	if !ready_peer_id.has(sender_id):
-		ready_peer_id.append(sender_id)
+	set_peer_ready.rpc(sender_id)
 	
 	try_all_peers_ready()
 
@@ -53,5 +70,5 @@ func check_all_peer_ready() -> bool:
 	return true
 
 
-func _on_peer_disconnected(peer_id: int):
+func _on_peer_disconnected(_peer_id: int):
 	try_all_peers_ready()

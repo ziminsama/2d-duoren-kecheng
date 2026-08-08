@@ -2,14 +2,27 @@ class_name GameUI
 extends CanvasLayer
 
 @export var enemy_manager: EnemyManager
+@export var lobby_manager: LobbyManager
+
 @onready var time_label: Label = %TimeLabel
 @onready var round_label: Label = %RoundLabel
 @onready var health_progress_bar: ProgressBar = %HealthProgressBar
 @onready var display_name_label: Label = %DisplayNameLabel
+@onready var ready_label: Label = %ReadyLabel
+@onready var not_ready_label: Label = %NotReadyLabel
+@onready var ready_count_label: Label = %ReadyCountLabel
+@onready var ready_up_container: VBoxContainer = $MarginContainer/ReadyUpContainer
+@onready var round_info_container: VBoxContainer = $MarginContainer/RoundInfoContainer
 
 
 func _ready() -> void:
 	enemy_manager.round_changed.connect(_on_round_begin)
+	lobby_manager.self_peer_ready.connect(_on_self_peer_ready)
+	lobby_manager.lobby_closed.connect(_on_lobby_closed)
+	ready_up_container.visible = true
+	round_info_container.visible = false
+	ready_label.visible = false
+	not_ready_label.visible = true
 
 #时间是浮点一直在变,所有通过process获取,
 func _process(_delta: float) -> void:
@@ -34,4 +47,14 @@ func _on_round_begin(round_count: int):
 
 
 func _on_health_changed(current_health: int, max_health: int):
-	health_progress_bar. value = float(current_health) / float(max_health) if max_health !=0 else 0
+	health_progress_bar.value = float(current_health) / float(max_health) if max_health !=0 else 0
+
+
+func _on_self_peer_ready():
+	ready_label.visible = true
+	not_ready_label.visible = false
+
+
+func _on_lobby_closed():
+	ready_up_container.visible = false
+	round_info_container.visible = true

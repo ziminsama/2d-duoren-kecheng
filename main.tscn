@@ -32,8 +32,9 @@ spawn_path = NodePath("../YSortRoot")
 layer = 2
 visible = false
 
-[node name="GameUI" parent="." unique_id=1234196221 node_paths=PackedStringArray("enemy_manager") instance=ExtResource("3_1bvp3")]
+[node name="GameUI" parent="." unique_id=1234196221 node_paths=PackedStringArray("enemy_manager", "lobby_manager") instance=ExtResource("3_1bvp3")]
 enemy_manager = NodePath("../EnemyManager")
+lobby_manager = NodePath("../LobbyManager")
 
 [node name="GameCamera" parent="." unique_id=886246909 instance=ExtResource("4_7mycd")]
 position = Vector2(320, 180)
