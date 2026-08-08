@@ -18,7 +18,10 @@ func _process(_delta: float) -> void:
 
 func connect_player(player: Player):
 	(func():
-		display_name_label.text = player.display_name
+		if multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+			display_name_label.text = "Player"
+		else:
+			display_name_label.text = player.display_name
 		player.health_component.health_changed.connect(_on_health_changed)
 		#一般不单独调用信号处理函数,但是因为第一次生命变更在_ready中,可能先于同步器,导致第一次变更没有触发信号;更严谨的方法是写一个更新什么值的方法
 		_on_health_changed(player.health_component.current_health, player.health_component.max_health)

@@ -14,6 +14,7 @@ var player_scene: PackedScene = preload("uid://c0k0voeng6qno")
 @onready var _backgournd_effects: Node2D = $BackgourndEffects
 @onready var _background_mask: Sprite2D = %BackgroundMask
 @onready var game_ui: GameUI = $GameUI
+@onready var pause_menu: PauseMenu = $PauseMenu
 
 var dead_peers: Array[int] = []
 var player_dictionary: Dictionary[int, Player] = {}
@@ -44,6 +45,8 @@ func _ready() -> void:
 		return player
 	
 	peer_ready.rpc_id(1, MultiplayerConfig.display_name)
+	
+	pause_menu.quit_requested.connect(_on_quit_requested)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	if is_multiplayer_authority():
 		enemy_manager.round_completed.connect(_on_round_completed)
@@ -77,6 +80,7 @@ func respawn_dead_peers():
 
 
 func end_game():
+	get_tree().paused = false
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
 
@@ -121,4 +125,8 @@ func _on_peer_disconnected(peer_id: int):
 
 
 func _on_game_completed():
+	end_game()
+
+
+func _on_quit_requested():
 	end_game()
