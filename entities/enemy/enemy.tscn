@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://b4qnki6cbv8k8" path="res://entities/enemy/attack_alert.png" id="4_d50e0"]
 [ext_resource type="PackedScene" uid="uid://ckc1phdlte8tq" path="res://component/hitbox_component.tscn" id="5_4wwj3"]
 [ext_resource type="PackedScene" uid="uid://dnben7cprltn6" path="res://component/hit_flash_sprite_component.tscn" id="5_61ikd"]
-[ext_resource type="Shader" uid="uid://8g6lixbqha5l" path="res://resourses/shader/hit_flash.gdshader" id="6_721x4"]
+[ext_resource type="Shader" uid="uid://8g6lixbqha5l" path="res://resources/shader/hit_flash.gdshader" id="6_721x4"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_im2q6"]
 properties/0/path = NodePath(".:global_position")

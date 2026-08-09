@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b56uaw1de0gyj"]
 
-[ext_resource type="Shader" uid="uid://bfyd23iwgt4qd" path="res://resourses/shader/background.gdshader" id="1_lsgk8"]
+[ext_resource type="Shader" uid="uid://bfyd23iwgt4qd" path="res://resources/shader/background.gdshader" id="1_lsgk8"]
 [ext_resource type="Texture2D" uid="uid://dho2sh5oikqr2" path="res://assets/background.png" id="2_sdl01"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_omy8q"]
