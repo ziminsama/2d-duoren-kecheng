@@ -19,7 +19,7 @@ func _ready() -> void:
 	enemy_manager.round_changed.connect(_on_round_begin)
 	lobby_manager.self_peer_ready.connect(_on_self_peer_ready)
 	lobby_manager.lobby_closed.connect(_on_lobby_closed)
-	lobby_manager.peer_ready_state_changed.connect(_on_peer_ready_state_changed)
+	lobby_manager.peer_ready_states_changed.connect(_on_peer_ready_state_changed)
 	
 	var is_single_player := multiplayer.multiplayer_peer is OfflineMultiplayerPeer
 	ready_up_container.visible = !is_single_player
