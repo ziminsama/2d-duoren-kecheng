@@ -9,7 +9,7 @@ static var background_mask: Sprite2D
 var player_scene: PackedScene = preload("uid://c0k0voeng6qno")
 
 @onready var multiplayer_spawner: MultiplayerSpawner = $MultiplayerSpawner
-@onready var player_spawn_position: Marker2D = $PlayerSpawnPosition
+@onready var center_position: Marker2D = $CenterPosition
 @onready var enemy_manager: EnemyManager = $EnemyManager
 @onready var _backgournd_effects: Node2D = $BackgourndEffects
 @onready var _background_mask: Sprite2D = %BackgroundMask
@@ -31,7 +31,7 @@ func _ready() -> void:
 		player.set_display_name(data.display_name)
 		player.name = str(data.peer_id)
 		player.input_multiplayer_authority = data.peer_id
-		player.global_position = player_spawn_position.global_position
+		player.global_position = center_position.global_position
 		
 		if multiplayer.get_unique_id() == data.peer_id:
 			game_ui.connect_player(player)
