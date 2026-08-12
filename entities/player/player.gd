@@ -74,6 +74,8 @@ func try_fire():
 	#这个变量其实是场景实例化的节点,还在内存中,下一步再加到main场景中变成节点
 	bullet.global_position = barrel_position.global_position
 	#老师总结的经验是建议在添加节点之前改位置,这样会在_ready函数之前设好,如果添加了再改位置,就会运行了_ready之后再赋值全局位置
+	
+	bullet.source_peer_id = player_input_synchronizer_component.get_multiplayer_authority()
 	bullet.start(player_input_synchronizer_component.aim_vector)
 	#alt+↑是把代码上移，旋转和方向等自定义属性，可在节点加入场景树前先修改，有些是不行的。
 	get_parent().add_child(bullet, true)

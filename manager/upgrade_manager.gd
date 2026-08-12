@@ -30,10 +30,27 @@ func generate_upgrade_option():
 			available_upgrades[0], 
 			available_upgrades[0]
 		]
-		set_upgrade_options.rpc_id(connected_peer_id, selected_upgrades) #这个是服务端调用,服务端给每个客户端选
+		var upgrade_resources: Array[UpgradeResource] = [
+			available_upgrades[0], 
+			available_upgrades[0], 
+			available_upgrades[0]
+		]
+		var upgrade_options := create_upgrade_option_nodes(upgrade_resources)
+		var upgrade_names: Array = []
+		for upgrade_option in upgrade_options:
+			upgrade_option.set_peer_id_filter(connected_peer_id)
+			var uid :=ResourceUID.create_id()
+			upgrade_option.name = str(uid)
+			upgrade_names.append(upgrade_option.name)
+		
+		if connected_peer_id != MultiplayerPeer.TARGET_PEER_SERVER:
+			set_upgrade_options.rpc_id(connected_peer_id, selected_upgrades, upgrade_names) 
 
 
-func show_upgrade_resources(upgrade_resources: Array[UpgradeResource]):
+func create_upgrade_option_nodes(
+	upgrade_resources: Array[UpgradeResource]
+)-> Array[UpgradeOption]:
+	var result: Array[UpgradeOption] = []
 	var initial_x = -64
 	var x_difference = 64
 	
@@ -44,37 +61,35 @@ func show_upgrade_resources(upgrade_resources: Array[UpgradeResource]):
 		
 		upgrade_option.global_position = spawn_position.global_position
 		upgrade_option.global_position += Vector2.RIGHT * (initial_x + x_difference * i)
-		
 		spawn_root.add_child(upgrade_option)
 		
 		upgrade_option.selected.connect(_on_upgrade_option_selected)
+		result.append(upgrade_option)
+	
+	return result
 
 
 @rpc("authority", "call_local", "reliable")
-func set_upgrade_options(upgrades_ids: Array): #客户端接收的是升级资源的id,需要把id转化成资源,再调用show_upgrade_resources
+func set_upgrade_options(upgrade_ids: Array, upgrade_names): #客户端接收的是升级资源的id,需要把id转化成资源,再调用show_upgrade_resources
 	var upgrade_resources: Array[UpgradeResource] = []
-	for upgrades_id in upgrades_ids:
+	for upgrade_id in upgrade_ids:
 		#这里是用了回调函数find_custom,逻辑是find_custom中自定义了个func遍历UpgradeResource中的元素
 		#如果id和上一个遍历的upgrades_id一样,才返回true, 然后停下, find_custom就能返回当前的下标int,
 		#array[int]表示数组第int-1个位置的元素
 		var resource_index: int = available_upgrades.find_custom(func (item: UpgradeResource):
-			return item.id == upgrades_id
+			return item.id == upgrade_id
 		)
 		upgrade_resources.append(available_upgrades[resource_index])
 	
-	show_upgrade_resources(upgrade_resources)
+	var created_nodes := create_upgrade_option_nodes(upgrade_resources)
+	for i in created_nodes.size():
+		created_nodes[i].name = upgrade_names[i]
 
 
-@rpc("any_peer", "call_local", "reliable")
-func notify_upgrade_selected(upgrade_index: int):
-	if !is_multiplayer_authority():
-		return
-	
-	var peer_id := multiplayer.get_remote_sender_id()
-	
+func handle_upgrade_selected(upgrade_index: int, for_peer_id: int):
 	print("Peer %s has selected upgrade with id %s" %[
-		peer_id, 
-		peer_id_to_upgrade_options[peer_id][upgrade_index].id
+		for_peer_id, 
+		peer_id_to_upgrade_options[for_peer_id][upgrade_index].id
 	])
 
 
@@ -82,5 +97,5 @@ func _on_round_completed():
 	generate_upgrade_option()
 
 
-func _on_upgrade_option_selected(upgrade_index: int):
-	notify_upgrade_selected.rpc_id(MultiplayerPeer.TARGET_PEER_SERVER, upgrade_index)
+func _on_upgrade_option_selected(upgrade_index: int, for_peer_id: int):
+	handle_upgrade_selected(upgrade_index, for_peer_id)

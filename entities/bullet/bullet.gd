@@ -7,8 +7,10 @@ const SPEED: int = 600
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 
 var direction: Vector2
+var source_peer_id: int
 
 func _ready() -> void:
+	hitbox_component.source_peer_id = source_peer_id
 	hitbox_component.hit_hurtbox.connect(_on_hit_hurtbox)
 	life_timer.timeout.connect(_on_life_timer_timeout)
 	#connect里面的是函数名，不加()
