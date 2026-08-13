@@ -20,11 +20,7 @@ func generate_upgrade_option():
 	var connected_peer_ids := multiplayer.get_peers()
 	connected_peer_ids.append(MultiplayerPeer.TARGET_PEER_SERVER)
 	for connected_peer_id in connected_peer_ids:
-		var selected_upgrades := [
-			available_upgrades[0].id, 
-			available_upgrades[0].id, 
-			available_upgrades[0].id
-		]
+
 		peer_id_to_upgrade_options[connected_peer_id] = [
 			available_upgrades[0], 
 			available_upgrades[0], 
@@ -35,21 +31,28 @@ func generate_upgrade_option():
 			available_upgrades[0], 
 			available_upgrades[0]
 		]
+		
 		var upgrade_options := create_upgrade_option_nodes(upgrade_resources)
-		var upgrade_names: Array = []
-		for upgrade_option in upgrade_options:
+		var selected_upgrades: Array = []
+		for i in upgrade_options.size():
+			var upgrade_option := upgrade_options[i]
+			var upgrade_resource := upgrade_resources[i]
 			upgrade_option.set_peer_id_filter(connected_peer_id)
 			var uid :=ResourceUID.create_id()
 			upgrade_option.name = str(uid)
-			upgrade_names.append(upgrade_option.name)
+			
+			selected_upgrades.append({
+				"name": upgrade_option.name,
+				"id": upgrade_resource.id
+			})
+			
+			upgrade_option.visible = connected_peer_id == MultiplayerPeer.TARGET_PEER_SERVER
 		
 		if connected_peer_id != MultiplayerPeer.TARGET_PEER_SERVER:
-			set_upgrade_options.rpc_id(connected_peer_id, selected_upgrades, upgrade_names) 
+			set_upgrade_options.rpc_id(connected_peer_id, selected_upgrades) 
 
 
-func create_upgrade_option_nodes(
-	upgrade_resources: Array[UpgradeResource]
-)-> Array[UpgradeOption]:
+func create_upgrade_option_nodes(upgrade_resources: Array[UpgradeResource])-> Array[UpgradeOption]:
 	var result: Array[UpgradeOption] = []
 	var initial_x = -64
 	var x_difference = 64
@@ -70,20 +73,17 @@ func create_upgrade_option_nodes(
 
 
 @rpc("authority", "call_local", "reliable")
-func set_upgrade_options(upgrade_ids: Array, upgrade_names): #客户端接收的是升级资源的id,需要把id转化成资源,再调用show_upgrade_resources
+func set_upgrade_options(selected_upgrades: Array): #客户端接收的是升级资源的id,需要把id转化成资源,再调用show_upgrade_resources
 	var upgrade_resources: Array[UpgradeResource] = []
-	for upgrade_id in upgrade_ids:
-		#这里是用了回调函数find_custom,逻辑是find_custom中自定义了个func遍历UpgradeResource中的元素
-		#如果id和上一个遍历的upgrades_id一样,才返回true, 然后停下, find_custom就能返回当前的下标int,
-		#array[int]表示数组第int-1个位置的元素
+	for upgrade in selected_upgrades:
 		var resource_index: int = available_upgrades.find_custom(func (item: UpgradeResource):
-			return item.id == upgrade_id
+			return item.id == upgrade.id
 		)
 		upgrade_resources.append(available_upgrades[resource_index])
 	
 	var created_nodes := create_upgrade_option_nodes(upgrade_resources)
 	for i in created_nodes.size():
-		created_nodes[i].name = upgrade_names[i]
+		created_nodes[i].name = selected_upgrades[i].name
 
 
 func handle_upgrade_selected(upgrade_index: int, for_peer_id: int):
