@@ -1,6 +1,8 @@
 class_name UpgradeManager
 extends Node
 
+signal upgrades_completed
+
 @export var enemy_manager: EnemyManager #挂载会发出round_completed的EnemyManager
 @export var spawn_position: Node2D
 @export var spawn_root: Node
@@ -13,6 +15,7 @@ var upgrade_option_scene: PackedScene = preload("uid://c416xr6lgku2v")
 #var peer_id_upgrade_options: Dictionary[int, Array[UpgradeResource]]
 var peer_id_to_upgrade_options: Dictionary[int, Array] = {}
 var peer_id_to_upgrades_acquired: Dictionary[int, Dictionary] = {} #嵌套的字典无法加类型,不知道版本更新行不行
+var outstanding_peers_to_upgrade: Array[int] = []
 
 
 static func get_peer_upgrade_count(peer_id: int, upgrade_id: String) -> int:
@@ -35,6 +38,9 @@ static func peer_has_upgrade(peer_id:int, upgrade_id: String) -> bool:
 func _ready() -> void:
 	instance = self #把instance指向self,就是指向节点本身
 	enemy_manager.round_completed.connect(_on_round_completed)
+	
+	if is_multiplayer_authority():
+		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
 #做随机升级资源，简单粗暴方法，打乱数组取前三个，费不了多少资源；但更常见做法是用战利品表。这里不讲战利品表，只讲简单粗暴方法
 func generate_upgrade_option():
@@ -42,6 +48,8 @@ func generate_upgrade_option():
 	var connected_peer_ids := multiplayer.get_peers()
 	connected_peer_ids.append(MultiplayerPeer.TARGET_PEER_SERVER)
 	for connected_peer_id in connected_peer_ids:
+		outstanding_peers_to_upgrade.append(connected_peer_id)
+		
 		var available_upgrades_copy := Array(available_upgrades)
 		available_upgrades_copy.shuffle()
 		
@@ -107,7 +115,7 @@ func handle_upgrade_selected(upgrade_index: int, for_peer_id: int):
 	if !peer_id_to_upgrades_acquired.has(for_peer_id):
 		peer_id_to_upgrades_acquired[for_peer_id] = {}
 	
-	var upgrade_dictionary: Dictionary = peer_id_to_upgrades_acquired[for_peer_id] #把键for_peer_id的值是一个数组,赋给了upgrade_array
+	var upgrade_dictionary: Dictionary = peer_id_to_upgrades_acquired[for_peer_id] #把键for_peer_id的值是一个数组,赋给了upgrade_dictionary
 	var chosen_upgrade = peer_id_to_upgrade_options[for_peer_id][upgrade_index] #取字典中键for_peer_id的值,是数组,再取数组中键upgrade_index的值
 	
 	var upgrade_count: int = 0
@@ -116,10 +124,21 @@ func handle_upgrade_selected(upgrade_index: int, for_peer_id: int):
 	
 	upgrade_dictionary[chosen_upgrade.id] = upgrade_count + 1
 	
+	outstanding_peers_to_upgrade.erase(for_peer_id)
+	
 	print("Peer %s has selected upgrade with id %s" %[
 		for_peer_id, 
 		peer_id_to_upgrade_options[for_peer_id][upgrade_index].id
 	])
+	
+	check_upgrades_complete()
+
+
+func check_upgrades_complete():
+	if outstanding_peers_to_upgrade.size() > 0:
+		return
+	
+	upgrades_completed.emit()
 
 
 func _on_round_completed():
@@ -128,3 +147,9 @@ func _on_round_completed():
 
 func _on_upgrade_option_selected(upgrade_index: int, for_peer_id: int):
 	handle_upgrade_selected(upgrade_index, for_peer_id)
+
+
+func _on_peer_disconnected(peer_id: int):
+	if outstanding_peers_to_upgrade.has(peer_id):
+		outstanding_peers_to_upgrade.erase(peer_id)
+		check_upgrades_complete()

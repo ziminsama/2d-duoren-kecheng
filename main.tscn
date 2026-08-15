@@ -21,9 +21,10 @@ script = ExtResource("1_ig7tw")
 
 [node name="LobbyManager" parent="." unique_id=423309602 instance=ExtResource("2_5vw27")]
 
-[node name="EnemyManager" parent="." unique_id=958176721 node_paths=PackedStringArray("enemy_spawn_root", "spawn_rect") instance=ExtResource("2_h2yge")]
+[node name="EnemyManager" parent="." unique_id=958176721 node_paths=PackedStringArray("enemy_spawn_root", "spawn_rect", "upgrade_manager") instance=ExtResource("2_h2yge")]
 enemy_spawn_root = NodePath("../YSortRoot")
 spawn_rect = NodePath("../SpawnRect")
+upgrade_manager = NodePath("../UpgradeManager")
 
 [node name="UpgradeManager" parent="." unique_id=1082839101 node_paths=PackedStringArray("enemy_manager", "spawn_position", "spawn_root") instance=ExtResource("4_kek77")]
 enemy_manager = NodePath("../EnemyManager")

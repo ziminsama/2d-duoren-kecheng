@@ -75,7 +75,7 @@ func get_fire_rate() -> float:
 		"fire_rate"
 	)
 	
-	var fire_rate_modifier := 1 - (.5 * fire_rate_count)
+	var fire_rate_modifier := 1 - (.15 * fire_rate_count)
 	
 	return BASE_FIRE_RATE * fire_rate_modifier
 
