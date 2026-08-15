@@ -4,6 +4,8 @@ extends CharacterBody2D
 signal died
 
 const BASE_MOVEMENT_SPEED: float = 100
+const BASE_FIRE_RATE: float = .25
+const BASE_BULLET_DAMAGE: int = 1
 
 @onready var player_input_synchronizer_component: PlayerInputSynchronizerComponent = $PlayerInputSynchronizerComponent
 @onready var weapon_root: Node2D = $Visuals/WeaponRoot
@@ -57,12 +59,34 @@ func _process(_delta: float) -> void:
 
 
 func get_movement_speed() -> float:
-	var has_movement_upgrade := UpgradeManager.peer_has_upgrade(
+	var movement_upgrade_count := UpgradeManager.get_peer_upgrade_count(
 		player_input_synchronizer_component.get_multiplayer_authority(),
 		"movement_speed"
 	)
 	
-	return BASE_MOVEMENT_SPEED if !has_movement_upgrade else BASE_MOVEMENT_SPEED * 4
+	var speed_modifier := 1 + (1 * movement_upgrade_count)
+	
+	return BASE_MOVEMENT_SPEED * speed_modifier
+
+
+func get_fire_rate() -> float:
+	var fire_rate_count := UpgradeManager.get_peer_upgrade_count(
+		player_input_synchronizer_component.get_multiplayer_authority(),
+		"fire_rate"
+	)
+	
+	var fire_rate_modifier := 1 - (.5 * fire_rate_count)
+	
+	return BASE_FIRE_RATE * fire_rate_modifier
+
+
+func get_bullet_damage() -> int:
+	var damage_count := UpgradeManager.get_peer_upgrade_count(
+		player_input_synchronizer_component.get_multiplayer_authority(),
+		"damage"
+	)
+	
+	return BASE_BULLET_DAMAGE + damage_count
 
 
 func set_display_name(incoming_name: String):
@@ -81,15 +105,15 @@ func try_fire():
 	if !fire_rate_timer.is_stopped():
 		return
 	
-	var bullet = bullet_scene.instantiate() as Bullet
-	#这个变量其实是场景实例化的节点,还在内存中,下一步再加到main场景中变成节点
-	bullet.global_position = barrel_position.global_position
-	#老师总结的经验是建议在添加节点之前改位置,这样会在_ready函数之前设好,如果添加了再改位置,就会运行了_ready之后再赋值全局位置
-	
+	var bullet = bullet_scene.instantiate() as Bullet #这个变量其实是场景实例化的节点,还在内存中,下一步再加到main场景中变成节点
+	bullet.damage = get_bullet_damage()
+	bullet.global_position = barrel_position.global_position #老师总结的经验是建议在添加节点之前改位置,这样会在_ready函数之前设好,如果添加了再改位置,就会运行了_ready之后再赋值全局位置
 	bullet.source_peer_id = player_input_synchronizer_component.get_multiplayer_authority()
-	bullet.start(player_input_synchronizer_component.aim_vector)
-	#alt+↑是把代码上移，旋转和方向等自定义属性，可在节点加入场景树前先修改，有些是不行的。
+	bullet.start(player_input_synchronizer_component.aim_vector) #alt+↑是把代码上移，旋转和方向等自定义属性，可在节点加入场景树前先修改，有些是不行的。
+	
 	get_parent().add_child(bullet, true)
+	
+	fire_rate_timer.wait_time = get_fire_rate()
 	fire_rate_timer.start()
 	
 	play_fire_effect.rpc()

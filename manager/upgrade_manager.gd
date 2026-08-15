@@ -12,21 +12,24 @@ var upgrade_option_scene: PackedScene = preload("uid://c416xr6lgku2v")
 #godot暂时不支持字典存自定义数组,无法使用下面的方法
 #var peer_id_upgrade_options: Dictionary[int, Array[UpgradeResource]]
 var peer_id_to_upgrade_options: Dictionary[int, Array] = {}
-var peer_id_to_upgrades_acquired: Dictionary[int, Array] = {} #键int是peer_id, 值Array是peer_id获取的resource,不断会append
+var peer_id_to_upgrades_acquired: Dictionary[int, Dictionary] = {} #嵌套的字典无法加类型,不知道版本更新行不行
+
+
+static func get_peer_upgrade_count(peer_id: int, upgrade_id: String) -> int:
+	if !is_instance_valid(instance):
+		return 0
+	
+	if !instance.peer_id_to_upgrades_acquired.has(peer_id):
+		return 0
+	
+	if !instance.peer_id_to_upgrades_acquired[peer_id].has(upgrade_id):
+		return 0
+	
+	return instance.peer_id_to_upgrades_acquired[peer_id][upgrade_id]
 
 
 static func peer_has_upgrade(peer_id:int, upgrade_id: String) -> bool:
-	if !is_instance_valid(instance):
-		return false
-	
-	if !instance.peer_id_to_upgrades_acquired.has(peer_id):
-		return false
-	
-	var index := instance.peer_id_to_upgrades_acquired[peer_id].find_custom(func (item):
-		return item.id == upgrade_id
-	)
-	
-	return index > -1
+	return get_peer_upgrade_count(peer_id, upgrade_id) > 0
 
 
 func _ready() -> void:
@@ -102,11 +105,16 @@ func set_upgrade_options(selected_upgrades: Array): #客户端接收的是升级
 
 func handle_upgrade_selected(upgrade_index: int, for_peer_id: int):
 	if !peer_id_to_upgrades_acquired.has(for_peer_id):
-		peer_id_to_upgrades_acquired[for_peer_id] = []
+		peer_id_to_upgrades_acquired[for_peer_id] = {}
 	
-	var upgrade_array := peer_id_to_upgrades_acquired[for_peer_id] #把键for_peer_id的值是一个数组,赋给了upgrade_array
-	var chosen_upgrade = peer_id_to_upgrade_options[for_peer_id][upgrade_index] #
-	upgrade_array.append(chosen_upgrade)
+	var upgrade_dictionary: Dictionary = peer_id_to_upgrades_acquired[for_peer_id] #把键for_peer_id的值是一个数组,赋给了upgrade_array
+	var chosen_upgrade = peer_id_to_upgrade_options[for_peer_id][upgrade_index] #取字典中键for_peer_id的值,是数组,再取数组中键upgrade_index的值
+	
+	var upgrade_count: int = 0
+	if upgrade_dictionary.has(chosen_upgrade.id):
+		upgrade_count = upgrade_dictionary[chosen_upgrade.id]
+	
+	upgrade_dictionary[chosen_upgrade.id] = upgrade_count + 1
 	
 	print("Peer %s has selected upgrade with id %s" %[
 		for_peer_id, 
