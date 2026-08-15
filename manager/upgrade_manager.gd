@@ -1,3 +1,4 @@
+class_name UpgradeManager
 extends Node
 
 @export var enemy_manager: EnemyManager #挂载会发出round_completed的EnemyManager
@@ -5,38 +6,51 @@ extends Node
 @export var spawn_root: Node
 @export var available_upgrades: Array[UpgradeResource] #UpgradeResource就是新建的自定义资源
 
+static var instance: UpgradeManager
+
 var upgrade_option_scene: PackedScene = preload("uid://c416xr6lgku2v")
 #godot暂时不支持字典存自定义数组,无法使用下面的方法
 #var peer_id_upgrade_options: Dictionary[int, Array[UpgradeResource]]
 var peer_id_to_upgrade_options: Dictionary[int, Array] = {}
+var peer_id_to_upgrades_acquired: Dictionary[int, Array] = {} #键int是peer_id, 值Array是peer_id获取的resource,不断会append
+
+
+static func peer_has_upgrade(peer_id:int, upgrade_id: String) -> bool:
+	if !is_instance_valid(instance):
+		return false
+	
+	if !instance.peer_id_to_upgrades_acquired.has(peer_id):
+		return false
+	
+	var index := instance.peer_id_to_upgrades_acquired[peer_id].find_custom(func (item):
+		return item.id == upgrade_id
+	)
+	
+	return index > -1
 
 
 func _ready() -> void:
+	instance = self #把instance指向self,就是指向节点本身
 	enemy_manager.round_completed.connect(_on_round_completed)
 
-
+#做随机升级资源，简单粗暴方法，打乱数组取前三个，费不了多少资源；但更常见做法是用战利品表。这里不讲战利品表，只讲简单粗暴方法
 func generate_upgrade_option():
 	peer_id_to_upgrade_options.clear()
 	var connected_peer_ids := multiplayer.get_peers()
 	connected_peer_ids.append(MultiplayerPeer.TARGET_PEER_SERVER)
 	for connected_peer_id in connected_peer_ids:
-
-		peer_id_to_upgrade_options[connected_peer_id] = [
-			available_upgrades[0], 
-			available_upgrades[0], 
-			available_upgrades[0]
-		]
-		var upgrade_resources: Array[UpgradeResource] = [
-			available_upgrades[0], 
-			available_upgrades[0], 
-			available_upgrades[0]
-		]
+		var available_upgrades_copy := Array(available_upgrades)
+		available_upgrades_copy.shuffle()
 		
-		var upgrade_options := create_upgrade_option_nodes(upgrade_resources)
+		var chosen_upgrades := available_upgrades_copy.slice(0,3)
+		peer_id_to_upgrade_options[connected_peer_id] = chosen_upgrades
+
+		
+		var upgrade_options := create_upgrade_option_nodes(chosen_upgrades)
 		var selected_upgrades: Array = []
 		for i in upgrade_options.size():
 			var upgrade_option := upgrade_options[i]
-			var upgrade_resource := upgrade_resources[i]
+			var upgrade_resource := chosen_upgrades[i] as UpgradeResource
 			upgrade_option.set_peer_id_filter(connected_peer_id)
 			var uid :=ResourceUID.create_id()
 			upgrade_option.name = str(uid)
@@ -87,6 +101,13 @@ func set_upgrade_options(selected_upgrades: Array): #客户端接收的是升级
 
 
 func handle_upgrade_selected(upgrade_index: int, for_peer_id: int):
+	if !peer_id_to_upgrades_acquired.has(for_peer_id):
+		peer_id_to_upgrades_acquired[for_peer_id] = []
+	
+	var upgrade_array := peer_id_to_upgrades_acquired[for_peer_id] #把键for_peer_id的值是一个数组,赋给了upgrade_array
+	var chosen_upgrade = peer_id_to_upgrade_options[for_peer_id][upgrade_index] #
+	upgrade_array.append(chosen_upgrade)
+	
 	print("Peer %s has selected upgrade with id %s" %[
 		for_peer_id, 
 		peer_id_to_upgrade_options[for_peer_id][upgrade_index].id

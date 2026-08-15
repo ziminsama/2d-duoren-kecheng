@@ -3,6 +3,8 @@ extends CharacterBody2D
 
 signal died
 
+const BASE_MOVEMENT_SPEED: float = 100
+
 @onready var player_input_synchronizer_component: PlayerInputSynchronizerComponent = $PlayerInputSynchronizerComponent
 @onready var weapon_root: Node2D = $Visuals/WeaponRoot
 @onready var fire_rate_timer: Timer = $FireRateTimer
@@ -48,10 +50,19 @@ func _process(_delta: float) -> void:
 			global_position = Vector2.RIGHT * 1000
 			return
 
-		velocity = player_input_synchronizer_component.movement_vector * 300
+		velocity = player_input_synchronizer_component.movement_vector * get_movement_speed()
 		move_and_slide()
 		if player_input_synchronizer_component.is_attack_pressed:
 			try_fire()
+
+
+func get_movement_speed() -> float:
+	var has_movement_upgrade := UpgradeManager.peer_has_upgrade(
+		player_input_synchronizer_component.get_multiplayer_authority(),
+		"movement_speed"
+	)
+	
+	return BASE_MOVEMENT_SPEED if !has_movement_upgrade else BASE_MOVEMENT_SPEED * 4
 
 
 func set_display_name(incoming_name: String):

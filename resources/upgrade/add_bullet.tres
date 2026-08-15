@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UpgradeResource" format=3 uid="uid://cejw3v8ofll4"]
+
+[ext_resource type="Script" uid="uid://cxq2gittmfhlv" path="res://resources/upgrade/upgrade_resource.gd" id="1_h8pac"]
+
+[resource]
+script = ExtResource("1_h8pac")
+id = "add_bullet"
+display_name = "Add Bullet"
+description = "Bullet plus by 1"
+metadata/_custom_type_script = "uid://cxq2gittmfhlv"
