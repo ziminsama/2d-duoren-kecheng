@@ -146,6 +146,9 @@ _data = {
 [sub_resource type="CircleShape2D" id="CircleShape2D_mx40f"]
 radius = 8.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_c3ba2"]
+radius = 32.0
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xoods"]
 resource_local_to_scene = true
 shader = ExtResource("6_27yqu")
@@ -167,8 +170,50 @@ health_component = NodePath("../HealthComponent")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtboxComponent" unique_id=759288304]
 shape = SubResource("CircleShape2D_mx40f")
 
+[node name="PlayerDetectionArea" type="Area2D" parent="." unique_id=1266469988]
+position = Vector2(0, -17)
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDetectionArea" unique_id=117672788]
+shape = SubResource("CircleShape2D_c3ba2")
+
 [node name="HitFlashSpriteComponent" parent="." unique_id=76736567 node_paths=PackedStringArray("health_component") instance=ExtResource("5_xoods")]
 material = SubResource("ShaderMaterial_xoods")
 position = Vector2(0, -16)
 texture = ExtResource("4_34j1a")
 health_component = NodePath("../HealthComponent")
+
+[node name="InfoContainer" type="VBoxContainer" parent="." unique_id=682567554]
+custom_minimum_size = Vector2(192, 0)
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -96.0
+offset_top = -80.0
+offset_right = 96.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="TitleLabel" type="Label" parent="InfoContainer" unique_id=1187488635]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83137256, 0.17254902, 0.30980393, 1)
+theme_override_constants/outline_size = 4
+text = "Example Title"
+horizontal_alignment = 1
+
+[node name="DescriptionLabel" type="Label" parent="InfoContainer" unique_id=1799258687]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(192, 0)
+layout_mode = 2
+theme_override_constants/outline_size = 4
+text = "Example Description
+hello world ! 你好世界 !"
+horizontal_alignment = 1
+autowrap_mode = 2
