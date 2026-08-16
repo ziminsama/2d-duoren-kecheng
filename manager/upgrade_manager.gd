@@ -90,6 +90,7 @@ func create_upgrade_option_nodes(upgrade_resources: Array[UpgradeResource])-> Ar
 		upgrade_option.global_position = spawn_position.global_position
 		upgrade_option.global_position += Vector2.RIGHT * (initial_x + x_difference * i)
 		spawn_root.add_child(upgrade_option)
+		upgrade_option.play_in(i * .1)
 		
 		upgrade_option.selected.connect(_on_upgrade_option_selected)
 		result.append(upgrade_option)
