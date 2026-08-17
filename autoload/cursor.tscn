@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://d0es4psvxab4x" path="res://assets/ui/crosshair.png" id="2_y2e7n"]
 
 [node name="Cursor" type="CanvasLayer" unique_id=1571089132]
+process_mode = 3
 layer = 100
 script = ExtResource("1_mp8dx")
 
