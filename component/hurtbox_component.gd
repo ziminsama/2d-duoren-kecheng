@@ -13,6 +13,9 @@ func _ready() -> void:
 
 
 func _handle_hit(hitbox_component: HitboxComponent):
+	if hitbox_component.is_hit_handle:
+		return
+	
 	hitbox_component.register_hurtbox_hit(self)
 	health_component.damage(hitbox_component.damage)
 	hit_by_hitbox.emit()
