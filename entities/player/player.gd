@@ -17,9 +17,11 @@ const BASE_BULLET_DAMAGE: int = 1
 @onready var display_name_label: Label = $DisplayNameLabel
 @onready var activation_area_collision_shape: CollisionShape2D = %ActivationAreaCollisionShape
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var hurtbox_component: HurtboxComponent = $HurtboxComponent
 
 var bullet_scene: PackedScene = preload("uid://jlap4yf3gf0i")
 var muzzle_flash_scene: PackedScene = preload("uid://cnxo8p5hrj6tv")
+var ground_particles_scene: PackedScene = preload("uid://bp6mw8nkehjmw")
 var input_multiplayer_authority: int
 var is_dying: bool
 var is_respawn: bool
@@ -43,10 +45,7 @@ func _ready() -> void:
 		if is_respawn:
 			health_component.current_health = 1
 		health_component.died.connect(_on_died)
-#func _input(event: InputEvent) -> void:
-	#if event.is_action_pressed("attack"):
-		#create_bullet()
-#一开始测试用的,后面要同步到服务器,直接删掉无用
+		hurtbox_component.hit_by_hitbox.connect(_on_hit_by_hitbox)
 
 
 func _process(delta: float) -> void:
@@ -101,6 +100,30 @@ func get_bullet_damage() -> int:
 	)
 	
 	return BASE_BULLET_DAMAGE + damage_count
+
+
+@rpc("authority", "call_local", "unreliable")
+func play_hit_effects():
+	if player_input_synchronizer_component.is_multiplayer_authority():
+		GameCamera.shake(1)
+	
+	var hit_particles: Node2D = ground_particles_scene.instantiate()
+	var background_node: Node = Main.background_mask
+	if !is_instance_valid(background_node):
+		background_node = get_parent()
+	
+	background_node.add_child(hit_particles)
+	hit_particles.global_position = global_position
+	
+	hurtbox_component.disable_collisions = true
+	var tween :=create_tween()
+	tween.set_loops(10)
+	tween.tween_property(visuals, "visible", false, .05)
+	tween.tween_property(visuals, "visible", true, .05)
+	
+	tween.finished.connect(func ():
+		hurtbox_component.disable_collisions = false
+	)
 
 
 func set_display_name(incoming_name: String):
@@ -168,4 +191,7 @@ func _kill():
 
 func _on_died():
 	kill()
-	
+
+
+func _on_hit_by_hitbox():
+	play_hit_effects.rpc()
