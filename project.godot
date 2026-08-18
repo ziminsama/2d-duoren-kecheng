@@ -15,11 +15,16 @@ run/main_scene="uid://bwmbsvhtlvheo"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
+[audio]
+
+buses/default_bus_layout="uid://cr006by1wylou"
+
 [autoload]
 
 GameEvents="*uid://dd320ogjt0htu"
 Background="*uid://b56uaw1de0gyj"
 Cursor="*uid://bfqf7ma007bg"
+UIAudioManager="*uid://mvdjr18sj31i"
 
 [display]
 

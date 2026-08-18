@@ -10,6 +10,7 @@ extends CharacterBody2D
 @onready var alert_sprite: Sprite2D = $AlertSprite
 @onready var hurtbox_component: HurtboxComponent = $HurtboxComponent
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var hit_stream_player: AudioStreamPlayer2D = $HitStreamPlayer
 
 var impact_particles_scene: PackedScene = preload("uid://cq1qm2s7qhrmo")
 var ground_particles_scene: PackedScene = preload("uid://by4v06jb7ah4e")
@@ -186,7 +187,8 @@ func acquire_target():
 
 
 @rpc("authority", "call_local", "unreliable")
-func spawn_hit_particles():
+func spawn_hit_effects():
+	hit_stream_player.play()
 	var hit_particles: Node2D = impact_particles_scene.instantiate()
 	hit_particles.global_position = hurtbox_component.global_position
 	get_parent().add_child(hit_particles)
@@ -212,4 +214,4 @@ func _on_died():
 
 
 func _on_hit_by_hitbox():
-	spawn_hit_particles.rpc()
+	spawn_hit_effects.rpc()

@@ -11,7 +11,7 @@ signal selected(index: int, for_peer_it: int)
 @onready var info_container: VBoxContainer = $InfoContainer
 @onready var title_label: Label = %TitleLabel
 @onready var description_label: Label = %DescriptionLabel
-
+@onready var hit_stream_player: AudioStreamPlayer2D = $HitStreamPlayer
 
 var impact_particles_scene: PackedScene = preload("uid://cq1qm2s7qhrmo")
 var ground_particles_scene: PackedScene = preload("uid://by4v06jb7ah4e")
@@ -92,7 +92,8 @@ func despawn():
 
 
 @rpc("authority", "call_local", "unreliable")
-func spawn_hit_particles():
+func spawn_hit_effects():
+	hit_stream_player.play()
 	var hit_particles: Node2D = impact_particles_scene.instantiate()
 	hit_particles.global_position = hurtbox_component.global_position
 	get_parent().add_child(hit_particles)
@@ -124,7 +125,7 @@ func _on_peer_disconnected(peer_id: int):
 
 
 func _on_hit_by_bitbox():
-	spawn_hit_particles.rpc_id(peer_id_filter)
+	spawn_hit_effects.rpc_id(peer_id_filter)
 
 
 func _on_player_detection_area_entered(_other_area: Area2D):

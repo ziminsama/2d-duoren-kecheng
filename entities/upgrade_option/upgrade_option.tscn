@@ -2,10 +2,14 @@
 
 [ext_resource type="Script" uid="uid://rhoewfdsfal3" path="res://entities/upgrade_option/upgrade_option.gd" id="1_yuvji"]
 [ext_resource type="PackedScene" uid="uid://b5usb40v6ijfb" path="res://component/health_component.tscn" id="2_34j1a"]
+[ext_resource type="AudioStream" uid="uid://csmjgblmit0ff" path="res://assets/audio/hit_1.wav" id="3_50v2f"]
 [ext_resource type="PackedScene" uid="uid://e2m56b2wfkua" path="res://component/hurtbox_component.tscn" id="3_jncuo"]
 [ext_resource type="Texture2D" uid="uid://dkat0ebpanulm" path="res://assets/upgrade/upgrade_option.png" id="4_34j1a"]
+[ext_resource type="AudioStream" uid="uid://bpxgnju0fa2c6" path="res://assets/audio/hit_2.wav" id="4_wxtqv"]
+[ext_resource type="AudioStream" uid="uid://4okxj87ohihy" path="res://assets/audio/hit_3.wav" id="5_wwg0f"]
 [ext_resource type="PackedScene" uid="uid://dnben7cprltn6" path="res://component/hit_flash_sprite_component.tscn" id="5_xoods"]
 [ext_resource type="Shader" uid="uid://8g6lixbqha5l" path="res://resources/shader/hit_flash.gdshader" id="6_27yqu"]
+[ext_resource type="AudioStream" uid="uid://bwkypamq22acx" path="res://assets/audio/hit_4.wav" id="6_c0upa"]
 
 [sub_resource type="Animation" id="Animation_34j1a"]
 length = 0.001
@@ -120,7 +124,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_27yqu"]
 resource_name = "spawn"
-length = 0.39999999999999997
+length = 0.4
 step = 0.05
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -143,13 +147,22 @@ _data = {
 &"spawn": SubResource("Animation_27yqu")
 }
 
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_l2ntx"]
+random_pitch = 1.0656005
+random_volume_offset_db = 2.0
+streams_count = 4
+stream_0/stream = ExtResource("3_50v2f")
+stream_1/stream = ExtResource("4_wxtqv")
+stream_2/stream = ExtResource("5_wwg0f")
+stream_3/stream = ExtResource("6_c0upa")
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_mx40f"]
 radius = 8.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_c3ba2"]
 radius = 32.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_xoods"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kwicr"]
 resource_local_to_scene = true
 shader = ExtResource("6_27yqu")
 shader_parameter/percent = 0.0
@@ -162,6 +175,12 @@ libraries/ = SubResource("AnimationLibrary_jm2d8")
 next/spawn = &"idle"
 
 [node name="HealthComponent" parent="." unique_id=1782218492 instance=ExtResource("2_34j1a")]
+
+[node name="HitStreamPlayer" type="AudioStreamPlayer2D" parent="." unique_id=868630515]
+stream = SubResource("AudioStreamRandomizer_l2ntx")
+volume_db = -2.0
+max_polyphony = 3
+bus = &"sfx"
 
 [node name="HurtboxComponent" parent="." unique_id=2120858935 node_paths=PackedStringArray("health_component") instance=ExtResource("3_jncuo")]
 position = Vector2(0, -16)
@@ -179,7 +198,7 @@ collision_mask = 8
 shape = SubResource("CircleShape2D_c3ba2")
 
 [node name="HitFlashSpriteComponent" parent="." unique_id=76736567 node_paths=PackedStringArray("health_component") instance=ExtResource("5_xoods")]
-material = SubResource("ShaderMaterial_xoods")
+material = SubResource("ShaderMaterial_kwicr")
 position = Vector2(0, -16)
 texture = ExtResource("4_34j1a")
 health_component = NodePath("../HealthComponent")
