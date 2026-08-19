@@ -10,6 +10,7 @@ streams_count = 1
 stream_0/stream = ExtResource("1_h7f35")
 
 [node name="UIAudioManager" type="Node" unique_id=1948181118]
+process_mode = 3
 script = ExtResource("1_knglf")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer2D" parent="." unique_id=1939453909]

@@ -32,7 +32,12 @@ horizontal_alignment = 1
 [node name="ResumeButton" type="Button" parent="MarginContainer/HBoxContainer" unique_id=1318746563]
 unique_name_in_owner = true
 layout_mode = 2
-text = "RESUME"
+text = "Resume"
+
+[node name="OptionsButton" type="Button" parent="MarginContainer/HBoxContainer" unique_id=947039350]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Options"
 
 [node name="QuitButton" type="Button" parent="MarginContainer/HBoxContainer" unique_id=714468950]
 unique_name_in_owner = true

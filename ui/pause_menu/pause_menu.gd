@@ -5,17 +5,21 @@ signal quit_requested
 
 @onready var resume_button: Button = %ResumeButton
 @onready var quit_button: Button = %QuitButton
+@onready var options_button: Button = %OptionsButton
 
 var current_paused_peer: int = -1
+var options_menu_scene: PackedScene = preload("uid://b2x7jtmwrt4kv")
 
 
 func _ready() -> void:
 	resume_button.pressed.connect(_on_resume_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
+	options_button.pressed.connect(_op_options_pressed)
 	
 	UIAudioManager.register_buttons([
 		resume_button,
-		quit_button
+		quit_button,
+		options_button
 	])
 	
 	if is_multiplayer_authority():
@@ -50,7 +54,9 @@ func pause(paused_peer: int):
 	get_tree().paused = true
 	visible = true
 	current_paused_peer = paused_peer
-	resume_button.disabled = current_paused_peer != multiplayer.get_unique_id()
+	var is_controlling_player = current_paused_peer == multiplayer.get_unique_id()
+	resume_button.disabled = !is_controlling_player
+	options_button.disabled = !is_controlling_player
 
 
 @rpc("authority", "call_local", "reliable")
@@ -71,3 +77,8 @@ func _on_quit_pressed():
 func _on_peer_disconnected(peer_id: int):
 	if current_paused_peer == peer_id:
 		unpause.rpc()
+
+
+func _op_options_pressed():
+	var option_menu := options_menu_scene.instantiate()
+	add_child(option_menu)
